@@ -4,15 +4,11 @@ services:
     image: ghcr.io/muchobien/pocketbase:0.29.0
     container_name: pocketbase
     restart: unless-stopped
-    command:
-    environment:
     ports:
       - "8090:8090"
     volumes:
-      - /pocketbase-service/pb_data:/pb_data
-      - /pocketbase-service/pb_public:/pb_public
-      - /pocketbase-service/pb_hooks:/pb_hooks
-      - /pocketbase-service/pb_migrations:/pb_hooks
+      - ./pocketbase-service/pb_hooks:/pb_hooks
+      - ./pocketbase-service/pb_migrations:/pb_migrations
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
       interval: 5s
@@ -23,6 +19,8 @@ services:
     build: ./mailin-service
     ports:
       - "25:1025"
-    volumes:
-
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+        restart: true
 

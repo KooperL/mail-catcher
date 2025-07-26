@@ -37,7 +37,9 @@ migrate((app) => {
           "CREATE UNIQUE INDEX idx_user ON emails (username)"
       ],
   })
+  app.save(collection)
 }, (app) => {
-  // No down migration
+  let collection = app.findCollectionByNameOrId("emails")
+  app.delete(collection)
 })
 
