@@ -1,4 +1,6 @@
-routerAdd("GET", "/api/emails", (e) => {
+// ========= FETCHING RECORDS
+
+routerAdd("GET", "/api/inbound_mail", (e) => {
     let username = e.requestInfo().query["subject"]
     let records = $app.findRecordsByFilter(
         "emails",
@@ -10,6 +12,44 @@ routerAdd("GET", "/api/emails", (e) => {
     )
     return e.json(200, records)
 })
+
+
+// ========= FORWARD MAIL
+
+onRecordCreate((e) => {
+  const indicator = 'MCb64'
+  try {
+    const {base64Encode, base64Decode} = require(`${__hooks}/utils.js`)
+    const username = e.record['username']
+    if (!username) return
+    const dotSeparated = username.split('.')
+    const finalItem = dotSeparated.slice(-1)
+    const isMailCatcherB64Encoded = finalItem.startsWith(indicator)
+    if (dotSeparated === 1 || !isMailCatcherB64Encoded) return
+
+    const decoded = base64Decode(finalItem.slice(indicator.length))
+    const encodedOptions = JSON.parse(decoded)
+
+    // fw = forward address
+    if (!encodedOptions.hasOwnProperty('fw')) return
+    const message = new MailerMessage({
+        from: {
+          address: e.app.settings().meta.senderAddress,
+          name: e.app.settings().meta.senderName,
+        },
+        to: [{address: encodedOptions['fw']}],
+        subject: e.record['subject'],
+        html: e.record['html'],
+        // bcc, cc and custom headers are also supported...
+    })
+    e.app.newMailClient().send(message)
+  } catch (e) {
+    console.error(e)
+  }
+}, "inbound_mail")
+
+
+// ========= MAILIN WEBHOOKS
 
 routerAdd("HEAD", "/api/webhook/mailin", (e) => {
   e.noContent(200)
@@ -34,37 +74,37 @@ routerAdd("POST", "/api/webhook/mailin", (e) => {
   let restProps;
   let text;
   let html;
+  let subject;
+  let domain;
 
   try {
     let mailData = parsed.value;
-    console.log(JSON.stringify(mailData.mailinMsg))
+    html = JSON.parse(mailData.mailinMsg[0]).html
+    text = JSON.parse(mailData.mailinMsg[0]).text
+    const subject = JSON.parse(mailData.mailinMsg[0]).headers.subject
+    restProps = JSON.stringify(Object.entries(parsed))
     const usernameRaw = JSON.parse(mailData.mailinMsg[0]).headers.to
     const emailMatch = usernameRaw.split(' ');
     if (emailMatch.length === 2) {
       const email = emailMatch[1].replace('<', '').replace('>', '');
-      username = email.split('@')[0];
+      [username, domain] = email.split('@');
     } else if (emailMatch.length === 1) {
       const email = emailMatch[0]
-      username = email.split('@')[0];
+      [username, domain] = email.split('@');
     }
-    html = JSON.parse(mailData.mailinMsg[0]).html
-    text = JSON.parse(mailData.mailinMsg[0]).text
-    restProps = 'JSON.stringify(Object.entries(parsed))'
   } catch (err) {
     console.log("Invalid JSON: " + err.message)
     return e.string(400, "Invalid JSON: " + err.message);
   }
   try {
     console.log("Saving mail")
-    let collection = $app.findCollectionByNameOrId("emails")
+    let collection = $app.findCollectionByNameOrId("inbound_mail")
     let record = new Record(collection)
-    // record.set('restProps', JSON.stringify(Object.entries(parsed)))
-    // record.set('html', JSON.stringify({}))
-    // record.set('text', JSON.stringify(parsed.value))
-    // record.set('username', '')
     record.set('restProps', restProps)
     record.set('html', html)
     record.set('text', text)
+    record.set('subject', subject)
+    record.set('domain', domain)
     record.set('username', username)
     $app.save(record);
 

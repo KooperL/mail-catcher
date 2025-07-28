@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   pocketbase:
-    image: ghcr.io/muchobien/pocketbase:0.29.0
+    image: ghcr.io/muchobien/pocketbase:0.24.0
     container_name: pocketbase
     restart: unless-stopped
     ports:
@@ -9,6 +9,10 @@ services:
     volumes:
       - ./pocketbase-service/pb_hooks:/pb_hooks
       - ./pocketbase-service/pb_migrations:/pb_migrations
+      - ./pocketbase-service/pb_public:/pb_public
+    command:
+      - --migrationsDir
+      - /pb_migrations
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
       interval: 5s
