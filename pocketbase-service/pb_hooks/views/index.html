@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mail-Catcher - Disposable Email Service</title>
+    <title>{{.SERVICE_NAME}} - Disposable Email Service</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-text {
@@ -32,8 +32,8 @@
 <body class="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 flex items-center justify-center p-5">
     <div class="glass-effect border border-white/20 rounded-3xl p-10 shadow-2xl max-w-lg w-full transform transition-transform duration-300 hover:-translate-y-2">
         <div class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-extrabold gradient-text mb-3 tracking-tight">Mail-Catcher</h1>
-            <p class="text-slate-600 text-lg leading-relaxed">Disposable email service with REST API functionality. Emails and their contents are not private and require no authentication or authorization.</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold gradient-text mb-3 tracking-tight">{{.SERVICE_NAME}}</h1>
+            <p class="text-slate-600 text-lg leading-relaxed">Disposable catch-all email service with REST API functionality. Beware: emails and their contents are not private and require no authentication or authorization to access.</p>
         </div>
 
         <div class="mb-6">
@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <button class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none p-4 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-300 active:translate-y-0 mt-5" onclick="window.location.href = `emails/${document.getElementById('email').value}`">Visit inbox</button>
+        <button class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none p-4 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-300 active:translate-y-0 mt-5" onclick="window.location.href = `emails?username=${document.getElementById('email').value}`">Visit inbox</button>
         <button class="w-full bg-white border border-black text-black p-4 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:translate-y-0 mt-5" onclick="copyEmail()">Copy Email Address</button>
         
         <div class="bg-emerald-50 text-emerald-700 p-3 rounded-lg mt-4 font-medium text-center opacity-0 transition-opacity duration-300" id="successMessage">

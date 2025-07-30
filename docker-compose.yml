@@ -4,8 +4,10 @@ services:
     image: ghcr.io/muchobien/pocketbase:0.24.0
     container_name: pocketbase
     restart: unless-stopped
+    environment:
+      SERVICE_NAME: mail-catcher
     ports:
-      - "8090:8090"
+      - "80:8090"
     volumes:
       - ./pocketbase-service/pb_hooks:/pb_hooks
       - ./pocketbase-service/pb_migrations:/pb_migrations

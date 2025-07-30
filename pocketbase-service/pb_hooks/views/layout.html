@@ -4,7 +4,6 @@
     <title>{{block "title" .}}Default app title{{end}}</title>
     <script src="https://unpkg.com/@tanstack/table-core@8.11.3/build/umd/index.production.js"></script>
     <script src="https://unpkg.com/@tanstack/match-sorter-utils@8.19.4/build/umd/index.production.js"></script>
-    <script type="module" src="./js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -24,9 +23,9 @@
     <div id="root">
         <div id="header" class="glass-effect border-b border-white/20 shadow-2xl pulse-glow sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-                <h1 class="text-4xl md:text-5xl font-extrabold gradient-text tracking-tight hover:scale-105 transition-transform duration-300 cursor-pointer">
-                    mail-catcher
-                </h1>
+                <a href="/" class="text-4xl md:text-5xl font-extrabold gradient-text tracking-tight hover:scale-105 transition-transform duration-300 cursor-pointer">
+                  {{.SERVICE_NAME}}
+                </a>
                 <div id="header-links" class="flex gap-6">
                     <a href="https://github.com/KooperL/mail-catcher" 
                        class="sparkle px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-emerald-300 border border-white/20">
@@ -61,7 +60,7 @@
                                 <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                             </svg>
                         </div>
-                        <span class="font-semibold text-gray-700">Mail-Catcher</span>
+                        <span class="font-semibold text-gray-700">{{.SERVICE_NAME}}</span>
                     </div>
                     <p class="text-gray-600 text-center md:text-right">
                         Crafted with JS
