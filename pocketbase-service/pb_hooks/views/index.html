@@ -1,1 +1,159 @@
--- Don't work on this file, it's just a placeholder for the index page.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mail-Catcher - Disposable Email Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        
+        .forward-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        
+        .forward-section.active {
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600 flex items-center justify-center p-5">
+    <div class="glass-effect border border-white/20 rounded-3xl p-10 shadow-2xl max-w-lg w-full transform transition-transform duration-300 hover:-translate-y-2">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold gradient-text mb-3 tracking-tight">Mail-Catcher</h1>
+            <p class="text-slate-600 text-lg leading-relaxed">Disposable email service with REST API functionality. Emails and their contents are not private and require no authentication or authorization.</p>
+        </div>
+
+        <div class="mb-6">
+            <label class="block font-semibold text-gray-700 mb-2 text-sm" for="email">Generated Email Address</label>
+            <div class="relative">
+                <input type="text" id="email" class="w-full p-4 border-2 border-gray-200 rounded-xl text-base bg-white transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none pr-24" readonly placeholder="Click generate to create email">
+                <button class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-none py-2 px-4 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-indigo-300" onclick="generateEmail()">Generate</button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 mb-5">
+            <input type="checkbox" id="forwardToggle" class="w-5 h-5 accent-indigo-500 cursor-pointer" onchange="toggleForward()">
+            <label class="font-medium text-gray-700 cursor-pointer select-none" for="forwardToggle">Enable email forwarding</label>
+        </div>
+
+        <div class="forward-section opacity-0 transform -translate-y-2 transition-all duration-400" id="forwardSection">
+            <div class="mb-5">
+                <label class="block font-semibold text-gray-700 mb-2 text-sm" for="forwardEmail">Forward to Email</label>
+                <input type="email" id="forwardEmail" class="w-full p-4 border-2 border-gray-200 rounded-xl text-base bg-white transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none" placeholder="your.email@gmail.com" oninput="updateEmail()">
+            </div>
+        </div>
+
+        <button class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none p-4 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-300 active:translate-y-0 mt-5" onclick="window.location.href = `emails/${document.getElementById('email').value}`">Visit inbox</button>
+        <button class="w-full bg-white border border-black text-black p-4 rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:translate-y-0 mt-5" onclick="copyEmail()">Copy Email Address</button>
+        
+        <div class="bg-emerald-50 text-emerald-700 p-3 rounded-lg mt-4 font-medium text-center opacity-0 transition-opacity duration-300" id="successMessage">
+            Email address copied to clipboard!
+        </div>
+    </div>
+
+    <script>
+        let baseEmail = '';
+        
+        function generateRandomString(length = 8) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function generateEmail() {
+            baseEmail = generateRandomString();
+            updateEmail();
+        }
+
+        function updateEmail() {
+            const emailInput = document.getElementById('email');
+            const forwardInput = document.getElementById('forwardEmail');
+            const isForwardingEnabled = document.getElementById('forwardToggle').checked;
+            
+            if (!baseEmail) {
+                emailInput.value = '';
+                return;
+            }
+            
+            let finalEmail = baseEmail;
+            
+            if (isForwardingEnabled && forwardInput.value.trim()) {
+                const forwardEmail = forwardInput.value.trim();
+                const encodedForwardEmail = btoa(JSON.stringify({fw: forwardEmail})).replaceAll('=', '')
+                const prefixedForwardEmail = encodedForwardEmail.startsWith('MCb64') ? encodedForwardEmail : 'MCB64' + encodedForwardEmail;
+                finalEmail = baseEmail + '.' + prefixedForwardEmail;
+            }
+            
+            emailInput.value = finalEmail + '@mail-catcher.com';
+        }
+
+        function toggleForward() {
+            const forwardSection = document.getElementById('forwardSection');
+            const forwardInput = document.getElementById('forwardEmail');
+            const checkbox = document.getElementById('forwardToggle');
+            
+            if (checkbox.checked) {
+                forwardSection.classList.add('active', 'opacity-100');
+                forwardSection.classList.remove('opacity-0', '-translate-y-2');
+            } else {
+                forwardSection.classList.remove('active', 'opacity-100');
+                forwardSection.classList.add('opacity-0', '-translate-y-2');
+                // Clear the forward email input and remove mcb64 prefix
+                forwardInput.value = '';
+            }
+            
+            updateEmail();
+        }
+
+        function copyEmail() {
+            const emailInput = document.getElementById('email');
+            const successMessage = document.getElementById('successMessage');
+            
+            if (!emailInput.value) {
+                alert('Please generate an email first!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(emailInput.value).then(() => {
+                successMessage.classList.add('opacity-100');
+                successMessage.classList.remove('opacity-0');
+                setTimeout(() => {
+                    successMessage.classList.remove('opacity-100');
+                    successMessage.classList.add('opacity-0');
+                }, 3000);
+            }).catch(() => {
+                // Fallback for older browsers
+                emailInput.select();
+                document.execCommand('copy');
+                successMessage.classList.add('opacity-100');
+                successMessage.classList.remove('opacity-0');
+                setTimeout(() => {
+                    successMessage.classList.remove('opacity-100');
+                    successMessage.classList.add('opacity-0');
+                }, 3000);
+            });
+        }
+
+        // Generate initial email on page load
+        window.onload = function() {
+            generateEmail();
+        };
+    </script>
+</body>
+</html>

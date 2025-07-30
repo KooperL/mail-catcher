@@ -66,8 +66,10 @@ function renderTable(tableContainer, table) {
     tableElement.appendChild(tbodyElement);
     table.getHeaderGroups().forEach((headerGroup) => {
         const tr = document.createElement("tr");
+        tr.classList = 'border-b border-gray-200'
         headerGroup.headers.forEach((header) => {
             const th = document.createElement("th");
+            th.classList = 'text-left py-4 px-6 font-semibold text-gray-700'
             th.innerHTML = header.isPlaceholder ? "" : flexRender(header.column.columnDef.header, header.getContext());
             tr.appendChild(th);
         });
@@ -76,7 +78,9 @@ function renderTable(tableContainer, table) {
 
     table.getRowModel().rows.forEach((row) => {
         const tr = document.createElement("tr");
-
+    console.log(row)
+        tr.onclick = () => window.location.href = `/emails/${row.original.id}`;
+        tr.classList = 'order-b border-gray-100 hover:bg-white/50 transition-colors cursor-pointer'
         const logAge = new Date(row.original.created).getTime();
         tr.setAttribute("data-log-age", logAge);
 
@@ -102,11 +106,9 @@ function renderTable(tableContainer, table) {
 
         row.getVisibleCells().forEach((cell) => {
             const td = document.createElement("td");
-
+            td.classList = 'py-4 px-6 text-gray-800'
             let value = ''
-            if (cell.column.id === 'session') {
-                value = `<div style="display: flex; flex-direction: row;"><div style="width: 2rem; height: 2rem; border-radius:100%;background-color: ${colourFromHash(cell.getValue())};"></div></div>`
-            } else if (['created'].includes(cell.column.id)) {
+            if (['created'].includes(cell.column.id)) {
                 value = new Date(cell.getValue()).toLocaleString()
             } else if (cell.column.id === 'text') {
                 value = cell.getValue().length > 50 ? cell.getValue().slice(0, 50) + '...' : cell.getValue()
@@ -123,52 +125,6 @@ function renderTable(tableContainer, table) {
             td.setAttribute("data-value", cell.getValue());
             td.innerHTML = value;
 
-            if (!td.onclick) {
-                td.style.cursor = 'copy'
-                td.onclick = () => {
-                    const filterVal = `${cell.column.id}: ${value}`
-                    const filterContainer = document.getElementById('filter-container')
-                    let filterExists = false
-                    Array.from(filterContainer.children).forEach(filter => {
-                        if (filter.innerHTML === filterVal) {
-                            filterExists = true
-                        }
-                    })
-                    if (filterExists) {
-                        return
-                    }
-
-                    table.setState((state) => {
-                        return {
-                            ...state,
-                            columnFilters: [
-                                {
-                                    id: cell.column.id,
-                                    value: cell.getValue(),
-                                },
-                                ...state.columnFilters,
-                            ],
-                        };
-                    });
-                    const newFilter = document.createElement('div')
-                    newFilter.innerHTML = filterVal
-                    newFilter.onclick = () => {
-                        table.setState((state) => {
-                            return {
-                                ...state,
-                                columnFilters: state.columnFilters.filter((filter) => filter.id !== cell.column.id),
-                            };
-                        });
-                        newFilter.remove()
-                    }
-                    newFilter.classList.add('filter')
-                    newFilter.style.cursor = 'alias'
-                    filterContainer.appendChild(newFilter)
-
-                }
-            }
-
-
             tr.appendChild(td);
         });
 
@@ -176,15 +132,15 @@ function renderTable(tableContainer, table) {
         tbodyElement.appendChild(tr);
     });
     const paginationElement = document.createElement("div");
-    paginationElement.style = "display: flex; justify-content: space-between; align-items: center; padding: 10px;";
+    paginationElement.className = "flex justify-between items-center p-6 glass-effect border border-white/20 rounded-2xl shadow-lg mt-4";
     const emptyDiv = document.createElement("div");
     paginationElement.appendChild(emptyDiv);
 
     const pageControls = document.createElement("div");
-    pageControls.style = "display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 20px;";
+    pageControls.className = "flex items-center gap-6";
     const prevButton = document.createElement("button");
     prevButton.innerHTML = "Previous";
-    prevButton.style.marginRight = "10px";
+    prevButton.className = "px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none";
     prevButton.disabled = !table.getCanPreviousPage();
     prevButton.onclick = () => {
         table.previousPage();
@@ -192,12 +148,13 @@ function renderTable(tableContainer, table) {
     pageControls.appendChild(prevButton);
 
     const pageInfo = document.createElement("span");
+    pageInfo.className = "font-semibold text-gray-700 text-lg px-4";
     pageInfo.innerHTML = `Page ${table.getState().pagination.pageIndex + 1} of ${Math.ceil(table.options.data.length / table.getState().pagination.pageSize)}`;
     pageControls.appendChild(pageInfo);
 
     const nextButton = document.createElement("button");
     nextButton.innerHTML = "Next";
-    nextButton.style.marginLeft = "10px";
+    nextButton.className = "px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none";
     nextButton.disabled = !table.getCanNextPage();
     nextButton.onclick = async () => {
         table.nextPage();
@@ -207,6 +164,7 @@ function renderTable(tableContainer, table) {
 
 
     const pageSizeSelect = document.createElement("select");
+    pageSizeSelect.className = "p-3 border-2 border-gray-200 rounded-xl bg-white font-medium transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none shadow-sm";
     const pageSizeOptions = [5, 10, 20, 30, 40, 50];
     pageSizeOptions.forEach((pageSize) => {
         const pageSizeOption = document.createElement("option");
@@ -256,10 +214,13 @@ function renderTable(tableContainer, table) {
         get: (searchParams, prop) => searchParams.get(prop),
       });
 
+    if (!params?.username) window.location.href = '/';
+    document.getElementById('username-text').innerText = params.username
     let pageSize = 50;
     let rowOffset = 0;
     const fiveDaysAgo = new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
     const result = await pb.collection("inbound_mail").getList(rowOffset + 1, pageSize, {
+        filter: `username = "${params.username}"`
         // sort: "created",
     });
 
@@ -269,7 +230,7 @@ function renderTable(tableContainer, table) {
         "*",
         function (e) {
             if (e.action === "create") {
-                if (params?.host && e.record.host !== params.host) {
+                if (params?.username && e.record.host !== params.username) {
                     return
                 }
                 table.options.data = [e.record, ...table.options.data];
@@ -316,7 +277,7 @@ function renderTable(tableContainer, table) {
     for (let column of columns) {
         if ([
             ...['collectionId', 'collectionName', 'updated'],
-            ...['domain', 'html', 'restProps']
+            ...['domain', 'html', 'restProps', 'username']
         ].includes(column.accessorKey)) {
             // Hidden
             constructionOptions.initialState.columnVisibility[column.accessorKey] = false

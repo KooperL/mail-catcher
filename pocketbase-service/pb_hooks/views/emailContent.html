@@ -1,1 +1,10 @@
--- Don't work on this file, it's just a placeholder for the email content.
+{{define "body"}}
+    <div class="main-container max-w-7xl mx-auto space-y-6">
+        <div class="filter-container glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
+          {{.MAIL_SUBJECT}}
+        </div>
+        <div class="filter-container glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
+          {{.MAIL_HTML}}
+        </div>
+    </div>
+{{end}}
