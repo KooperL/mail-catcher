@@ -1,6 +1,6 @@
 // ========= FETCHING RECORDS
 
-routerAdd("GET", "/api/inbound_mail", (e) => {
+routerAdd("GET", "/api/mc/inbound_mail", (e) => {
     let username = e.requestInfo().query["subject"]
     let records = $app.findRecordsByFilter(
         "emails",
@@ -11,6 +11,27 @@ routerAdd("GET", "/api/inbound_mail", (e) => {
         { "username": username.toLowerCase() }, // filter params
     )
     return e.json(200, records)
+})
+
+routerAdd("GET", "/api/mc/logs", (e) => {
+let logs = arrayOf(new DynamicModel({
+    id:      "",
+    created: "",
+    message: "",
+    level:   0,
+    data:    {},
+}))
+
+// see https://pocketbase.io/docs/js-database/#query-builder
+$app.logQuery().
+    // target only debug and info logs
+    andWhere($dbx.in("level", -4, 0)).
+    // the data column is serialized json object and could be anything
+    andWhere($dbx.exp("json_extract(data, '$.type') = 'request'")).
+    orderBy("created DESC").
+    limit(100).
+    all(logs)
+    return e.json(200, logs)
 })
 
 
@@ -45,19 +66,21 @@ onRecordCreate((e) => {
     e.app.newMailClient().send(message)
   } catch (e) {
     console.error(e)
+  } finally {
+    e.next()
   }
 }, "inbound_mail")
 
 
 // ========= MAILIN WEBHOOKS
 
-routerAdd("HEAD", "/api/webhook/mailin", (e) => {
+routerAdd("HEAD", "/api/mc/webhook/mailin", (e) => {
   e.noContent(200)
 })
 
-routerAdd("POST", "/api/webhook/mailin", (e) => {
-  const ct = e.request.headers.get("content-type") || "";
-  if (!ct.includes("multipart/form-data")) {
+routerAdd("POST", "/api/mc/webhook/mailin", (e) => {
+  const ct = e.request.header.get("content-type");
+  if (!ct || !ct.includes("multipart/form-data")) {
     console.log("Expected multipart/form-data")
     return e.string(400, "Expected multipart/form-data");
   }
@@ -81,7 +104,7 @@ routerAdd("POST", "/api/webhook/mailin", (e) => {
     let mailData = parsed.value;
     html = JSON.parse(mailData.mailinMsg[0]).html
     text = JSON.parse(mailData.mailinMsg[0]).text
-    const subject = JSON.parse(mailData.mailinMsg[0]).headers.subject
+    subject = JSON.parse(mailData.mailinMsg[0]).headers.subject
     restProps = JSON.stringify(Object.entries(parsed))
     const usernameRaw = JSON.parse(mailData.mailinMsg[0]).headers.to
     const emailMatch = usernameRaw.split(' ');

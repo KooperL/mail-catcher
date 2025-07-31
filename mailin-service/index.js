@@ -2,7 +2,7 @@ var mailin = require('mailin')
 
 var options = {
 	port: 1025,
-	webhook: 'http://pocketbase:80/api/webhook/mailin'
+	webhook: process.env.PB_HOST + '/api/mc/webhook/mailin'
 }
 
 mailin.start(options)

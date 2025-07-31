@@ -2,7 +2,7 @@ routerAdd("get", "/", (c) => {
     const html = $template.loadFiles(
       `${__hooks}/views/index.html`,
     ).render({
-      PB_HOST: 'http://127.0.0.1:80',
+      PB_HOST: process.env.PB_HOST,
       SERVICE_NAME: process.env.SERVICE_NAME
     })
   
@@ -14,7 +14,7 @@ routerAdd("get", "/emails", (c) => {
       `${__hooks}/views/layout.html`,
       `${__hooks}/views/emailList.html`,
     ).render({
-      PB_HOST: 'http://127.0.0.1:80',
+      PB_HOST: process.env.PB_HOST,
       SERVICE_NAME: process.env.SERVICE_NAME
     })
   
@@ -32,7 +32,7 @@ routerAdd("get", "/emails/{mailId}", (c) => {
       `${__hooks}/views/layout.html`,
       `${__hooks}/views/emailContent.html`,
     ).render({
-      PB_HOST: 'http://127.0.0.1:80',
+      PB_HOST: process.env.PB_HOST,
       SERVICE_NAME: process.env.SERVICE_NAME,
       MAIL_HTML: record.get('html'),
       MAIL_SUBJECT: record.get('subject')

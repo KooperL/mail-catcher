@@ -1,11 +1,12 @@
 version: "3.7"
 services:
   pocketbase:
-    image: ghcr.io/muchobien/pocketbase:0.24.0
+    image: ghcr.io/muchobien/pocketbase:0.29
     container_name: pocketbase
     restart: unless-stopped
     environment:
       SERVICE_NAME: mail-catcher
+      PB_HOST: http://mail-catcher.net:80
     ports:
       - "80:8090"
     volumes:
@@ -23,6 +24,8 @@ services:
   mailin-service:
     container_name: mailin-service
     build: ./mailin-service
+    environment:
+      PB_HOST: http://pocketbase:8090 # If running the vanilla setup, this value is an inter-container call
     ports:
       - "25:1025"
     depends_on:
