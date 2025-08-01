@@ -6,6 +6,7 @@
 # Mail Catcher
 
 Mail-catcher is a disposable mail service designed for testing and temporary email needs. In can be stood up in just a few commands on a dedicated server or VPS.
+By default, it will render unsanitized HTML.
 
 ## Purpose
 
@@ -13,6 +14,7 @@ Mail-catcher is a disposable mail service designed for testing and temporary ema
 - Protect your primary inbox from spam.
 - Create throw away accounts.
 - Use for QA, development, or demo environments.
+- Forward emails to a primary inbox
 
 ## Setup
 
@@ -25,7 +27,7 @@ Mail-catcher is a disposable mail service designed for testing and temporary ema
 
 1. **Clone the Repository**
     ```sh
-    git clone https://github.com/yourusername/mail-catcher.git
+    git clone https://github.com/kooperl/mail-catcher.git
     cd mail-catcher
     ```
 
@@ -41,10 +43,17 @@ Mail-catcher is a disposable mail service designed for testing and temporary ema
 
 To receive emails for your domain, and make the web server accessible, add the following DNS records:
 
-| Type | Name                | Value                | Priority |
-|------|---------------------|----------------------|----------|
-| MX   | @                   | yourdomain.com       | 10       |
-| A    | yourdomain.com      | 123.45.67.89         |          |
+| Type | Name                | Value                | Priority |              |
+|------|---------------------|----------------------|----------|--------------|
+| MX   | @                   | yourdomain.com       | 10       |              |
+| A    | yourdomain.com      | 123.45.67.89         |          |              |
+| MX   | sub                 | sub.yourdomain.com   | 10       |OPTIONAL      |
+| A    | sub.yourdomain.com  | 123.45.67.89         |          |EXTRA DOMAIN  |
 
 This will make your server reachable on the domain given in the A record. 
 The MX record will also be the domain used for your email address. It's possible to define subdomains here.
+
+
+### SMTP
+
+Mail Catcher uses the default PocketBase mail implementation, which is a wrapper over the system's `sendmail` utility. Note that most cloud compute providers disable or restrict `sendmail` by default. To ensure reliable email delivery, configure PocketBase to use a hosted SMTP provider in the admin panel.

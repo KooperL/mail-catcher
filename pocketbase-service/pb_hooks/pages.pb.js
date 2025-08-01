@@ -3,6 +3,7 @@ routerAdd("get", "/", (c) => {
       `${__hooks}/views/index.html`,
     ).render({
       PB_HOST: process.env.PB_HOST,
+      MAIL_DOMAINS: process.env.MAIL_DOMAINS,
       SERVICE_NAME: process.env.SERVICE_NAME
     })
   
@@ -32,9 +33,11 @@ routerAdd("get", "/emails/{mailId}", (c) => {
       `${__hooks}/views/layout.html`,
       `${__hooks}/views/emailContent.html`,
     ).render({
+      ENABLE_HTML_RENDERING: process.env.ENABLE_HTML_RENDERING,
       PB_HOST: process.env.PB_HOST,
       SERVICE_NAME: process.env.SERVICE_NAME,
       MAIL_HTML: record.get('html'),
+      MAIL_TEXT: record.get('text'),
       MAIL_SUBJECT: record.get('subject')
     })
   

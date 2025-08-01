@@ -1,14 +1,52 @@
+// OPTIONAL Delete mail that's older than 30 days
+cronAdd("delete_stale_mail", "0 2 * * *", () => {
+    const dao = $app.dao()
+    
+    const staleDate = new Date()
+    staleDate.setDate(staleDate.getDate() - 30)
+    const staleDateStr = staleDate.toISOString().split('T')[0] + ' 00:00:00.000Z'
+    
+    try {
+        const staleFilter = `created < "${staleDateStr}"`
+        const staleRecords = dao.findRecordsByFilter("posts", staleFilter, "-created", 0, 0)
+        
+        if (staleRecords.length === 0) {
+            console.log("No stale mail found to delete")
+            return
+        }
+        
+        console.log(`Found ${staleRecords.length} stale emails to delete`)
+        
+        let deletedCount = 0
+        for (let record of staleRecords) {
+            try {
+                dao.deleteRecord(record)
+                deletedCount++
+            } catch (err) {
+                console.error(`Failed to delete email ${record.id}:`, err.message)
+            }
+        }
+        
+        console.log(`Successfully deleted ${deletedCount} stale posts`)
+        
+    } catch (err) {
+        console.error("Error in delete_stale_mail cron:", err.message)
+    }
+})
+
+
 // ========= FETCHING RECORDS
 
 routerAdd("GET", "/api/mc/inbound_mail", (e) => {
-    let username = e.requestInfo().query["subject"]
+    let username = e.requestInfo().query["username"]
+    let domain = e.requestInfo().query["domain"]
     let records = $app.findRecordsByFilter(
         "emails",
-        "username = {:username}",
+        "username = {:username} && domain = {:domain}",
         "-created", // sort
         500, // limit
         0, // offset
-        { "username": username.toLowerCase() }, // filter params
+        { "username": username.toLowerCase(), "domain": domain.toLowerCase() }, // filter params
     )
     return e.json(200, records)
 })
@@ -127,8 +165,8 @@ routerAdd("POST", "/api/mc/webhook/mailin", (e) => {
     record.set('html', html)
     record.set('text', text)
     record.set('subject', subject)
-    record.set('domain', domain)
-    record.set('username', username)
+    record.set('domain', domain.toLowerCase())
+    record.set('username', username.toLowerCase())
     $app.save(record);
 
     return e.string(200, "OK");

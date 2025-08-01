@@ -3,6 +3,12 @@
         <div class="filter-container glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
               <div class="flex flex-col md:flex-row gap-6 items-start md:items-center md:justify-between">
                 <span class="block font-semibold text-gray-700 mb-3 text-2xl" id="username-text">...</span>
+                <div class="flex flex-row">
+                <a
+                    id="json-redirect-node"
+                    href="/"
+                    class="text-nowrap p-4 border-2 border-gray-200 rounded-xl text-base bg-white transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none shadow-sm"
+        >API &lt;&#x2f;&gt;</a>     
                 <input 
                     type="text" 
                     id="global-filter" 
@@ -11,20 +17,9 @@
                 />     
   </div>
   </div>
-        
+  </div>
         <div id="table-container" class="glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
             <!-- Sample table for demonstration -->
-        </div>
-        
-        <div id="details-container" class="glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
-            <div class="mb-4">
-                <label class="block font-semibold text-gray-700 mb-3 text-lg">Details</label>
-            </div>
-            <textarea 
-                id="details-verbose" 
-                class="w-full h-64 p-6 border-2 border-gray-200 rounded-xl text-base bg-white/80 transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none resize-none shadow-sm backdrop-blur-sm"
-                placeholder="Detailed information will appear here..."
-            ></textarea>
         </div>
     </div>
 
@@ -139,18 +134,12 @@ function renderTable(tableContainer, table) {
 
         row.getVisibleCells().forEach((cell) => {
             const td = document.createElement("td");
-            td.classList = 'py-4 px-6 text-gray-800'
+            td.classList = 'py-4 px-6 text-gray-800 cursor-pointer'
             let value = ''
             if (['created'].includes(cell.column.id)) {
                 value = new Date(cell.getValue()).toLocaleString()
             } else if (cell.column.id === 'text') {
                 value = cell.getValue().length > 50 ? cell.getValue().slice(0, 50) + '...' : cell.getValue()
-                td.style.cursor = 'pointer'
-                td.onclick = () => {
-                    const detailsVerbose = document.getElementById('details-verbose')
-                    detailsVerbose.innerHTML = cell.getValue()
-                    window.scrollTo(0, document.body.scrollHeight);
-                }
             } else {
                 value = flexRender(cell.column.columnDef.cell, cell.getContext())
             }
@@ -167,10 +156,11 @@ function renderTable(tableContainer, table) {
     const paginationElement = document.createElement("div");
     paginationElement.className = "flex justify-between items-center p-6 glass-effect border border-white/20 rounded-2xl shadow-lg mt-4";
     const emptyDiv = document.createElement("div");
+    emptyDiv.className = "hidden md:block "
     paginationElement.appendChild(emptyDiv);
 
     const pageControls = document.createElement("div");
-    pageControls.className = "flex items-center gap-6";
+    pageControls.className = "flex flex-col sm:flex-row items-center gap-6";
     const prevButton = document.createElement("button");
     prevButton.innerHTML = "Previous";
     prevButton.className = "px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none";
@@ -197,7 +187,7 @@ function renderTable(tableContainer, table) {
 
 
     const pageSizeSelect = document.createElement("select");
-    pageSizeSelect.className = "p-3 border-2 border-gray-200 rounded-xl bg-white font-medium transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none shadow-sm";
+    pageSizeSelect.className = "hidden md:block p-3 border-2 border-gray-200 rounded-xl bg-white font-medium transition-all duration-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none shadow-sm";
     const pageSizeOptions = [5, 10, 20, 30, 40, 50];
     pageSizeOptions.forEach((pageSize) => {
         const pageSizeOption = document.createElement("option");
@@ -247,13 +237,14 @@ function renderTable(tableContainer, table) {
         get: (searchParams, prop) => searchParams.get(prop),
       });
 
-    if (!params?.username) window.location.href = '/';
-    document.getElementById('username-text').innerText = params.username
+    if (!params?.username || !params?.domain) window.location.href = '/';
+    document.getElementById('username-text').innerText = params.username + '@' + params.domain
+  document.getElementById('json-redirect-node').href = `/api/mc/inbound_mail?username=${params.username}&domain=${params.domain}`
     let pageSize = 50;
     let rowOffset = 0;
     const fiveDaysAgo = new Date(new Date().getTime() - 5 * 24 * 60 * 60 * 1000).toISOString()
     const result = await pb.collection("inbound_mail").getList(rowOffset + 1, pageSize, {
-        filter: `username = "${params.username}"`
+    filter: `username = "${params.username.toLowerCase()}" && domain = "${params.domain.toLowerCase()}"`
         // sort: "created",
     });
 
