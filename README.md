@@ -11,10 +11,10 @@ By default, it will render unsanitized HTML.
 ## Purpose
 
 - Receive temporary emails for testing or registration.
+- Realtime email updates
 - Protect your primary inbox from spam.
-- Create throw away accounts.
 - Use for QA, development, or demo environments.
-- Forward emails to a primary inbox
+- Forward emails to a primary inbox.
 
 ## Setup
 
@@ -36,12 +36,14 @@ By default, it will render unsanitized HTML.
     docker compose up -d
     ```
 
-5. **Access the Web Interface**
+5. **Access the Web Interfaces**
     - The default port is `80` for this application (defined in `docker-compose`). It can be changed if your server is already busy on this port
+    - The pocketbase admin panel will not be accessible at `http://127.0.01:8090/_/`. Please use port `80` instead (this is due to the port mounting in the `docker-compose.yml`)
+    - Mount a `pb_data` to retain email data, otherwise it will be wiped on reboots
 
 ### DNS Configuration
 
-To receive emails for your domain, and make the web server accessible, add the following DNS records:
+To receive emails for your domain, and make the web server accessible, add a pair of `A` and `MX` records, as such:
 
 | Type | Name                | Value                | Priority |              |
 |------|---------------------|----------------------|----------|--------------|
@@ -50,8 +52,8 @@ To receive emails for your domain, and make the web server accessible, add the f
 | MX   | sub                 | sub.yourdomain.com   | 10       |OPTIONAL      |
 | A    | sub.yourdomain.com  | 123.45.67.89         |          |EXTRA DOMAIN  |
 
-This will make your server reachable on the domain given in the A record. 
-The MX record will also be the domain used for your email address. It's possible to define subdomains here.
+This will make your server reachable on the domain given in the `A` record. 
+The `MX` record will also be the domain used for your email address. In the example above, we define two reachable domains.
 
 
 ### SMTP

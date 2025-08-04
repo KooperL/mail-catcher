@@ -16,6 +16,13 @@
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
         }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 <body>
@@ -23,7 +30,7 @@
     <div id="root">
         <div id="header" class="glass-effect border-b border-white/20 shadow-2xl pulse-glow sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-                <a href="/" class="text-4xl md:text-5xl font-extrabold gradient-text tracking-tight hover:scale-105 transition-transform duration-300 cursor-pointer">
+                <a href="/" class="text-4xl md:text-5xl font-extrabold gradient-text mb-3 tracking-tight hover:scale-105 transition-transform duration-300 cursor-pointer">
                   {{.SERVICE_NAME}}
                 </a>
                 <div id="header-links" class="flex gap-6">
@@ -39,7 +46,7 @@
                         <svg class="inline-block w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                         </svg>
-                        Pocketbase admin
+                        admin
                     </a>
                 </div>
             </div>

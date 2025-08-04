@@ -1,4 +1,5 @@
 // OPTIONAL Delete mail that's older than 30 days
+
 cronAdd("delete_stale_mail", "0 2 * * *", () => {
     const dao = $app.dao()
     
@@ -41,27 +42,30 @@ routerAdd("GET", "/api/mc/inbound_mail", (e) => {
     let username = e.requestInfo().query["username"]
     let domain = e.requestInfo().query["domain"]
     let records = $app.findRecordsByFilter(
-        "emails",
-        "username = {:username} && domain = {:domain}",
+        "inbound_mail",
+        "username = {:username} && domain = {:domain}", // Filter (escaped)
         "-created", // sort
         500, // limit
         0, // offset
-        { "username": username.toLowerCase(), "domain": domain.toLowerCase() }, // filter params
+        {
+          "username": username.toLowerCase(),
+          "domain": domain.toLowerCase()
+        }, // escaped values
     )
     return e.json(200, records)
 })
 
 routerAdd("GET", "/api/mc/logs", (e) => {
-let logs = arrayOf(new DynamicModel({
-    id:      "",
-    created: "",
-    message: "",
-    level:   0,
-    data:    {},
-}))
-
-// see https://pocketbase.io/docs/js-database/#query-builder
-$app.logQuery().
+  let logs = arrayOf(new DynamicModel({
+      id:      "",
+      created: "",
+      message: "",
+      level:   0,
+      data:    {},
+  }))
+  
+  // see https://pocketbase.io/docs/js-database/#query-builder
+  $app.logQuery().
     // target only debug and info logs
     andWhere($dbx.in("level", -4, 0)).
     // the data column is serialized json object and could be anything
@@ -69,7 +73,7 @@ $app.logQuery().
     orderBy("created DESC").
     limit(100).
     all(logs)
-    return e.json(200, logs)
+  return e.json(200, logs)
 })
 
 

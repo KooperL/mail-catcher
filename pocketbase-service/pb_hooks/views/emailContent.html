@@ -3,6 +3,7 @@
     <div id="pure-text-node" class="hidden">{{.MAIL_TEXT}}</div>
     <div id="html-render-option-node" class="hidden">{{.ENABLE_HTML_RENDERING}}</div>
     <div class="main-container max-w-7xl mx-auto space-y-6">
+  <a id="back-button" href="/emails?username={{.MAIL_USERNAME}}&domain={{.MAIL_DOMAIN}}">Back to email list</a>
         <div class="subject-container glass-effect border border-white/20 rounded-3xl p-8 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1">
           {{.MAIL_SUBJECT}}
         </div>

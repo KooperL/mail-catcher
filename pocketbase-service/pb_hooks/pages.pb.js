@@ -38,6 +38,8 @@ routerAdd("get", "/emails/{mailId}", (c) => {
       SERVICE_NAME: process.env.SERVICE_NAME,
       MAIL_HTML: record.get('html'),
       MAIL_TEXT: record.get('text'),
+      MAIL_USERNAME: record.get('username'),
+      MAIL_DOMAIN: record.get('domain'),
       MAIL_SUBJECT: record.get('subject')
     })
   
